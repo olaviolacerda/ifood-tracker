@@ -152,7 +152,10 @@ export function PurchaseCard({
                   />
                   <div className="absolute right-0 top-full mt-1 w-40 bg-popover border border-border rounded-lg shadow-lg z-20 overflow-hidden">
                     <button
-                      onClick={handleEdit}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit();
+                      }}
                       className="w-full px-4 py-2.5 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2"
                     >
                       <svg
@@ -172,7 +175,10 @@ export function PurchaseCard({
                       <span>Editar</span>
                     </button>
                     <button
-                      onClick={handleDelete}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete();
+                      }}
                       className="w-full px-4 py-2.5 text-left text-sm hover:bg-muted transition-colors flex items-center gap-2 text-red-600 dark:text-red-400"
                     >
                       <svg
