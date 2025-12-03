@@ -22,6 +22,7 @@ import {
   getWeeklySpendingData,
   getMonthlyEvolutionData,
 } from "@/lib/stats";
+import { useCategories } from "@/hooks/useCategories";
 
 interface StatsModalProps {
   open: boolean;
@@ -30,10 +31,12 @@ interface StatsModalProps {
 }
 
 export function StatsModal({ open, onClose, purchases }: StatsModalProps) {
+  const { categories } = useCategories();
+
   if (!open) return null;
 
   const monthlyStats = calculateMonthlyStats(purchases);
-  const categoryData = calculateCategoryStats(purchases);
+  const categoryData = calculateCategoryStats(purchases, categories);
   const weeklySpendingData = getWeeklySpendingData(purchases);
   const monthlyEvolutionData = getMonthlyEvolutionData(purchases);
 
@@ -96,6 +99,75 @@ export function StatsModal({ open, onClose, purchases }: StatsModalProps) {
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* Insights */}
+          <div className="bg-gradient-to-r from-primary to-[#c4161f] rounded-2xl p-4 text-white">
+            <h3 className="font-semibold mb-2">💡 Insight do Mês</h3>
+            {monthlyStats.totalOrders > 0 ? (
+              <>
+                <p className="text-sm opacity-90 mb-3">
+                  Você fez {monthlyStats.totalOrders} pedidos este mês, com um
+                  gasto médio de R${" "}
+                  {monthlyStats.avgPerOrder.toFixed(2).replace(".", ",")} por
+                  pedido.
+                  {categoryData.length > 0 &&
+                    ` Sua categoria favorita é ${categoryData[0].name}.`}
+                </p>
+                {(() => {
+                  const MARMITA_PRICE = 21;
+                  const difference = monthlyStats.avgPerOrder - MARMITA_PRICE;
+                  const percentageMore = (
+                    (difference / MARMITA_PRICE) *
+                    100
+                  ).toFixed(0);
+                  const totalMarmitaCost =
+                    MARMITA_PRICE * monthlyStats.totalOrders;
+                  const savings = monthlyStats.totalSpent - totalMarmitaCost;
+
+                  if (monthlyStats.avgPerOrder <= MARMITA_PRICE) {
+                    return (
+                      <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
+                        <p className="text-sm font-medium">
+                          🎉 Parabéns! Você está gastando em média R${" "}
+                          {monthlyStats.avgPerOrder
+                            .toFixed(2)
+                            .replace(".", ",")}{" "}
+                          por pedido, menos ou igual ao preço de uma marmita (R$
+                          21,00).
+                        </p>
+                      </div>
+                    );
+                  } else if (savings > 0) {
+                    return (
+                      <div className="bg-white/10 rounded-lg p-3 backdrop-blur-sm">
+                        <p className="text-sm font-medium mb-2">
+                          💰 Se tivesse comido marmita: você gastaria R${" "}
+                          {totalMarmitaCost.toFixed(2).replace(".", ",")} no mês
+                        </p>
+                        <p className="text-sm">
+                          Você está gastando{" "}
+                          <span className="font-bold">
+                            R$ {savings.toFixed(2).replace(".", ",")} a mais
+                          </span>{" "}
+                          ({percentageMore}%) em delivery. São{" "}
+                          <span className="font-bold">
+                            {Math.floor(savings / MARMITA_PRICE)} marmitas
+                          </span>{" "}
+                          extras que você poderia ter pedido!
+                        </p>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+              </>
+            ) : (
+              <p className="text-sm opacity-90">
+                Comece a registrar seus pedidos para ver insights
+                personalizados!
+              </p>
+            )}
           </div>
 
           <div className="bg-card rounded-2xl p-4">
@@ -222,7 +294,7 @@ export function StatsModal({ open, onClose, purchases }: StatsModalProps) {
             {categoryData.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-muted-foreground text-sm">
-                  Nenhuma compra este mês
+                  Nenhum pedido este mês
                 </p>
               </div>
             ) : (
@@ -269,25 +341,6 @@ export function StatsModal({ open, onClose, purchases }: StatsModalProps) {
                 </div>
               </div>
             )}
-          </div>
-
-          {/* Insights */}
-          <div className="bg-gradient-to-r from-primary to-[#c4161f] rounded-2xl p-4 text-white">
-            <h3 className="font-semibold mb-2">Insight do Mês</h3>
-            <p className="text-sm opacity-90">
-              {monthlyStats.totalOrders > 0 ? (
-                <>
-                  Você fez {monthlyStats.totalOrders} pedidos este mês, com um
-                  gasto médio de R${" "}
-                  {monthlyStats.avgPerOrder.toFixed(2).replace(".", ",")} por
-                  pedido.
-                  {categoryData.length > 0 &&
-                    ` Sua categoria favorita é ${categoryData[0].name}.`}
-                </>
-              ) : (
-                "Comece a registrar seus pedidos para ver insights personalizados!"
-              )}
-            </p>
           </div>
 
           <div className="h-6" />

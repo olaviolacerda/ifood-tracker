@@ -4,6 +4,7 @@ import {
   MonthlyStats,
   CategoryStats,
 } from "@/types/purchase";
+import { Category } from "@/types/category";
 import {
   startOfWeek,
   endOfWeek,
@@ -14,15 +15,6 @@ import {
   subWeeks,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
-export const categories = [
-  { id: "fast-food", label: "Fast Food", emoji: "🍔", color: "#ea1d2c" },
-  { id: "japonês", label: "Japonesa", emoji: "🍣", color: "#a037f0" },
-  { id: "saudável", label: "Saudável", emoji: "🥗", color: "#1ea664" },
-  { id: "doces", label: "Sobremesa", emoji: "🍰", color: "#e7a74e" },
-  { id: "bebidas", label: "Bebidas", emoji: "🥤", color: "#3b82f6" },
-  { id: "outras", label: "Outras", emoji: "🍽️", color: "#717171" },
-];
 
 export function calculateWeeklyStats(purchases: Purchase[]): WeeklyStats {
   const now = new Date();
@@ -104,7 +96,10 @@ export function calculateMonthlyStats(purchases: Purchase[]): MonthlyStats {
   };
 }
 
-export function calculateCategoryStats(purchases: Purchase[]): CategoryStats[] {
+export function calculateCategoryStats(
+  purchases: Purchase[],
+  categories: Category[]
+): CategoryStats[] {
   const now = new Date();
   const monthStart = startOfMonth(now);
   const monthEnd = endOfMonth(now);
