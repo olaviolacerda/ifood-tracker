@@ -8,6 +8,7 @@ import {
   query,
   orderBy,
   deleteDoc,
+  updateDoc,
   doc,
   where,
 } from "firebase/firestore";
@@ -49,7 +50,7 @@ export function usePurchases() {
       setError(null);
     } catch (err) {
       console.error("Error fetching purchases:", err);
-      setError("Erro ao carregar compras");
+      setError("Erro ao carregar pedidos");
     } finally {
       setLoading(false);
     }
@@ -95,8 +96,54 @@ export function usePurchases() {
       return { success: true, id: docRef.id };
     } catch (err) {
       console.error("Error adding purchase:", err);
-      setError("Erro ao adicionar compra");
-      return { success: false, error: "Erro ao adicionar compra" };
+      setError("Erro ao adicionar pedido");
+      return { success: false, error: "Erro ao adicionar pedido" };
+    }
+  };
+
+  const updatePurchase = async (id: string, purchaseData: PurchaseInput) => {
+    if (!user) {
+      return { success: false, error: "Usuário não autenticado" };
+    }
+
+    try {
+      const dataToUpdate: any = {
+        dish: purchaseData.dish,
+        restaurant: purchaseData.restaurant,
+        valuePaid: purchaseData.valuePaid,
+        date: purchaseData.date,
+        time: purchaseData.time,
+        category: purchaseData.category,
+        isEvent: purchaseData.isEvent,
+        isAlone: purchaseData.isAlone,
+      };
+
+      // Only add valueTotal if it exists
+      if (
+        purchaseData.valueTotal !== undefined &&
+        purchaseData.valueTotal !== null
+      ) {
+        dataToUpdate.valueTotal = purchaseData.valueTotal;
+      }
+
+      await updateDoc(doc(db, "purchases", id), dataToUpdate);
+
+      setPurchases((prev) =>
+        prev.map((p) =>
+          p.id === id
+            ? {
+                ...p,
+                ...purchaseData,
+              }
+            : p
+        )
+      );
+
+      return { success: true };
+    } catch (err) {
+      console.error("Error updating purchase:", err);
+      setError("Erro ao atualizar pedido");
+      return { success: false, error: "Erro ao atualizar pedido" };
     }
   };
 
@@ -111,8 +158,8 @@ export function usePurchases() {
       return { success: true };
     } catch (err) {
       console.error("Error deleting purchase:", err);
-      setError("Erro ao deletar compra");
-      return { success: false, error: "Erro ao deletar compra" };
+      setError("Erro ao deletar pedido");
+      return { success: false, error: "Erro ao deletar pedido" };
     }
   };
 
@@ -125,6 +172,7 @@ export function usePurchases() {
     loading,
     error,
     addPurchase,
+    updatePurchase,
     deletePurchase,
     refetch: fetchPurchases,
   };

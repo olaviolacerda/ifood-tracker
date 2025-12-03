@@ -2,21 +2,26 @@
 
 import { useState, useEffect } from "react";
 import { X, ChevronDown, Calendar, Clock } from "lucide-react";
-import { PurchaseInput } from "@/types/purchase";
+import { Purchase, PurchaseInput } from "@/types/purchase";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useCategories } from "@/hooks/useCategories";
 
-interface AddPurchaseModalProps {
+interface EditPurchaseModalProps {
   open: boolean;
   onClose: () => void;
-  onAdd: (purchaseData: PurchaseInput) => Promise<{ success: boolean }>;
+  onUpdate: (
+    id: string,
+    purchaseData: PurchaseInput
+  ) => Promise<{ success: boolean }>;
+  purchase: Purchase | null;
 }
 
-export function AddPurchaseModal({
+export function EditPurchaseModal({
   open,
   onClose,
-  onAdd,
-}: AddPurchaseModalProps) {
+  onUpdate,
+  purchase,
+}: EditPurchaseModalProps) {
   const [dish, setDish] = useState("");
   const [restaurant, setRestaurant] = useState("");
   const [valuePaid, setValuePaid] = useState("");
@@ -38,19 +43,27 @@ export function AddPurchaseModal({
   // Load categories from database
   const { categories } = useCategories();
 
-  // Set default date and time when modal opens
+  // Load purchase data when modal opens
   useEffect(() => {
-    if (open) {
-      const now = new Date();
-      const dateStr = now.toISOString().split("T")[0];
-      const timeStr = now.toTimeString().slice(0, 5);
-      setDate(dateStr);
-      setTime(timeStr);
+    if (open && purchase) {
+      setDish(purchase.dish);
+      setRestaurant(purchase.restaurant);
+      setValuePaid(purchase.valuePaid.toString().replace(".", ","));
+      setValueTotal(
+        purchase.valueTotal
+          ? purchase.valueTotal.toString().replace(".", ",")
+          : ""
+      );
+      setDate(purchase.date);
+      setTime(purchase.time);
+      setCategory(purchase.category);
+      setIsEvent(purchase.isEvent);
+      setIsAlone(purchase.isAlone);
       setErrors({});
     }
-  }, [open]);
+  }, [open, purchase]);
 
-  if (!open) return null;
+  if (!open || !purchase) return null;
 
   const validateField = (field: string, value: string): string => {
     switch (field) {
@@ -168,27 +181,16 @@ export function AddPurchaseModal({
       isAlone,
     };
 
-    // Only add valueTotal if it has a valid value
     if (valueTotalNum !== undefined) {
       purchaseData.valueTotal = valueTotalNum;
     }
 
-    const result = await onAdd(purchaseData);
+    const result = await onUpdate(purchase.id, purchaseData);
 
     if (result.success) {
-      // Reset form
-      setDish("");
-      setRestaurant("");
-      setValuePaid("");
-      setValueTotal("");
-      setDate("");
-      setTime("");
-      setCategory("");
-      setIsEvent(false);
-      setIsAlone(true);
       onClose();
     } else {
-      alert("Erro ao salvar pedido. Tente novamente.");
+      alert("Erro ao atualizar pedido. Tente novamente.");
     }
 
     setIsSubmitting(false);
@@ -201,9 +203,12 @@ export function AddPurchaseModal({
       <div className="flex flex-col h-full">
         {/* Header */}
         <header className="flex items-center justify-between px-4 pt-12 pb-4 border-b border-border bg-background">
-          <h1 className="font-bold text-xl text-foreground">
-            Cadastrar Pedido
-          </h1>
+          <div>
+            <h1 className="font-bold text-xl text-foreground">Editar Pedido</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Atualize as informações do seu pedido
+            </p>
+          </div>
           <button
             onClick={onClose}
             className="w-10 h-10 bg-card rounded-full flex items-center justify-center active:scale-95 transition-transform"
@@ -265,7 +270,7 @@ export function AddPurchaseModal({
               )}
             </div>
 
-            {/* Valores - Grid */}
+            {/* Valores */}
             <div className="space-y-3">
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">
@@ -337,7 +342,7 @@ export function AddPurchaseModal({
               </div>
             </div>
 
-            {/* Data e Hora - Grid */}
+            {/* Data e Hora */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">
@@ -513,13 +518,20 @@ export function AddPurchaseModal({
         </div>
 
         {/* Submit Button */}
-        <div className="px-4 py-4 border-t border-border bg-background">
+        <div className="px-4 py-4 border-t border-border bg-background space-y-3">
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
             className="w-full bg-primary text-primary-foreground font-bold py-4 rounded-xl text-base active:scale-[0.98] transition-transform shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? "Salvando..." : "Salvar Pedido"}
+            {isSubmitting ? "Salvando alterações..." : "Salvar Alterações"}
+          </button>
+          <button
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="w-full bg-muted text-foreground font-medium py-3 rounded-xl text-base active:scale-[0.98] transition-transform disabled:opacity-50"
+          >
+            Cancelar
           </button>
         </div>
       </div>
