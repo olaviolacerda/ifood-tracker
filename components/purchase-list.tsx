@@ -6,14 +6,24 @@ interface PurchaseListProps {
   purchases: Purchase[];
   loading: boolean;
   error: string | null;
+  onDelete?: (id: string) => void;
+  onEdit?: (purchase: Purchase) => void;
+  onView?: (purchase: Purchase) => void;
 }
 
-export function PurchaseList({ purchases, loading, error }: PurchaseListProps) {
+export function PurchaseList({
+  purchases,
+  loading,
+  error,
+  onDelete,
+  onEdit,
+  onView,
+}: PurchaseListProps) {
   if (loading) {
     return (
       <section>
         <h2 className="font-bold text-lg text-foreground mb-4">
-          Histórico de Compras
+          Histórico de Pedidos
         </h2>
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -26,7 +36,7 @@ export function PurchaseList({ purchases, loading, error }: PurchaseListProps) {
     return (
       <section>
         <h2 className="font-bold text-lg text-foreground mb-4">
-          Histórico de Compras
+          Histórico de Pedidos
         </h2>
         <div className="bg-card rounded-xl p-6 text-center">
           <p className="text-muted-foreground">{error}</p>
@@ -39,14 +49,14 @@ export function PurchaseList({ purchases, loading, error }: PurchaseListProps) {
     return (
       <section>
         <h2 className="font-bold text-lg text-foreground mb-4">
-          Histórico de Compras
+          Histórico de Pedidos
         </h2>
         <div className="bg-card rounded-xl p-6 text-center">
           <p className="text-muted-foreground">
-            Nenhuma compra cadastrada ainda.
+            Nenhum pedido cadastrado ainda.
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            Clique em "Cadastrar Compra" para adicionar seu primeiro pedido.
+            Clique em "Cadastrar Pedido" para adicionar seu primeiro pedido.
           </p>
         </div>
       </section>
@@ -56,7 +66,7 @@ export function PurchaseList({ purchases, loading, error }: PurchaseListProps) {
   return (
     <section>
       <h2 className="font-bold text-lg text-foreground mb-4">
-        Histórico de Compras
+        Histórico de Pedidos
       </h2>
       <div className="flex flex-col gap-3">
         {purchases.map((purchase) => (
@@ -69,6 +79,19 @@ export function PurchaseList({ purchases, loading, error }: PurchaseListProps) {
               value: purchase.valuePaid,
               date: formatPurchaseDate(purchase.date, purchase.time),
               category: purchase.category,
+            }}
+            onDelete={onDelete}
+            onEdit={(cardPurchase) => {
+              // Pass the full purchase object instead of the card simplified version
+              if (onEdit) {
+                onEdit(purchase);
+              }
+            }}
+            onView={(cardPurchase) => {
+              // Pass the full purchase object for details view
+              if (onView) {
+                onView(purchase);
+              }
             }}
           />
         ))}
