@@ -343,7 +343,7 @@ export function EditPurchaseModal({
             </div>
 
             {/* Data e Hora - Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 overflow-hidden">
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">
                   Data <span className="text-primary">*</span>
@@ -353,7 +353,7 @@ export function EditPurchaseModal({
                     type="date"
                     value={date}
                     onChange={(e) => handleFieldChange("date", e.target.value)}
-                    className={`w-full bg-card rounded-xl px-4 py-3.5 text-foreground focus:outline-none focus:ring-2 border transition-colors ${
+                    className={`w-full min-w-0 max-w-full bg-card rounded-xl px-4 py-3.5 text-foreground focus:outline-none focus:ring-2 border transition-colors ${
                       isMobile ? "" : "appearance-none"
                     } ${
                       errors.date
@@ -382,7 +382,7 @@ export function EditPurchaseModal({
                     type="time"
                     value={time}
                     onChange={(e) => handleFieldChange("time", e.target.value)}
-                    className={`w-full bg-card rounded-xl px-4 py-3.5 text-foreground focus:outline-none focus:ring-2 border transition-colors ${
+                    className={`w-full min-w-0 max-w-full bg-card rounded-xl px-4 py-3.5 text-foreground focus:outline-none focus:ring-2 border transition-colors ${
                       isMobile ? "" : "appearance-none"
                     } ${
                       errors.time
