@@ -156,7 +156,7 @@ export function PurchaseDetailsModal({
           </div>
 
           {/* Date & Time */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="bg-card rounded-xl p-4 border border-border">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-lg">📅</span>
