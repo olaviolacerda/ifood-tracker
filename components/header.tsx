@@ -1,9 +1,11 @@
 "use client";
 
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Tag, Home } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { signOut } from "@/lib/auth";
 import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface HeaderProps {
   onLoginClick: () => void;
@@ -12,21 +14,23 @@ interface HeaderProps {
 export function Header({ onLoginClick }: HeaderProps) {
   const { user } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
+  const router = useRouter();
 
   const handleSignOut = async () => {
     await signOut();
     setShowMenu(false);
+    router.push("/");
   };
 
   return (
     <header className="sticky top-0 z-50 bg-primary px-4 pt-12 pb-4">
       <div className="flex items-center justify-between">
-        <div>
+        <Link href={user ? "/dashboard" : "/"} className="cursor-pointer">
           <p className="text-primary-foreground/80 text-sm">Olá,</p>
           <h1 className="text-primary-foreground font-bold text-xl">
             {user?.email?.split("@")[0] || "Visitante"}
           </h1>
-        </div>
+        </Link>
         <div className="flex items-center gap-3">
           <div className="relative">
             <button
@@ -47,6 +51,22 @@ export function Header({ onLoginClick }: HeaderProps) {
                         {user.email}
                       </p>
                     </div>
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setShowMenu(false)}
+                      className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-muted flex items-center gap-2"
+                    >
+                      <Home className="w-4 h-4" />
+                      Dashboard
+                    </Link>
+                    <Link
+                      href="/categories"
+                      onClick={() => setShowMenu(false)}
+                      className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-muted flex items-center gap-2"
+                    >
+                      <Tag className="w-4 h-4" />
+                      Categorias
+                    </Link>
                     <button
                       onClick={handleSignOut}
                       className="w-full px-4 py-3 text-left text-sm text-foreground hover:bg-muted flex items-center gap-2"

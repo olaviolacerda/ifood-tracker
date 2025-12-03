@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { signIn, signUp } from "@/lib/auth";
 
@@ -16,6 +17,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter();
 
   if (!open) return null;
 
@@ -49,6 +51,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
       setPassword("");
       setConfirmPassword("");
       onClose();
+      router.push("/dashboard");
     } else {
       const errorMessage = result.error || "";
       if (errorMessage.includes("auth/email-already-in-use")) {

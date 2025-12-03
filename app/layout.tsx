@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "iFood Tracker",
-  description: "Controle pessoal de compras no iFood",
+  description: "Controle pessoal de pedidos no iFood",
   generator: "v0.app",
   icons: {
     icon: [

@@ -1,22 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { Header } from "@/components/header";
-import { WeeklySummary } from "@/components/weekly-summary";
-import { StatsOverview } from "@/components/stats-overview";
-import { PurchaseList } from "@/components/purchase-list";
-import { StatsModal } from "@/components/stats-modal";
-import { AddPurchaseModal } from "@/components/add-purchase-modal";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { AuthModal } from "@/components/auth-modal";
-import { usePurchases } from "@/hooks/usePurchases";
 import { useAuth } from "@/contexts/AuthContext";
+import { TrendingUp, Shield, BarChart3, Bell } from "lucide-react";
 
 export default function HomePage() {
-  const [showStats, setShowStats] = useState(false);
-  const [showAddPurchase, setShowAddPurchase] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const { purchases, loading, error, addPurchase } = usePurchases();
   const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push("/dashboard");
+    }
+  }, [user, authLoading, router]);
 
   if (authLoading) {
     return (
@@ -29,61 +28,99 @@ export default function HomePage() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center space-y-6">
-          <div className="bg-primary/10 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
-            <span className="text-4xl">🍔</span>
-          </div>
-          <h1 className="text-3xl font-bold text-foreground">iFood Tracker</h1>
-          <p className="text-muted-foreground">
-            Controle seus gastos com delivery de forma simples e organizada
-          </p>
-          <button
-            onClick={() => setShowAuth(true)}
-            className="w-full bg-primary text-primary-foreground font-bold py-4 rounded-xl text-base active:scale-[0.98] transition-transform"
-          >
-            Começar Agora
-          </button>
-        </div>
-        <AuthModal open={showAuth} onClose={() => setShowAuth(false)} />
-      </div>
-    );
+  if (user) {
+    return null; // Will redirect via useEffect
   }
+
+  const features = [
+    {
+      icon: TrendingUp,
+      title: "Controle Total",
+      description: "Acompanhe todos os seus gastos com delivery em um só lugar",
+    },
+    {
+      icon: BarChart3,
+      title: "Estatísticas Detalhadas",
+      description: "Veja gráficos e insights sobre seus hábitos de consumo",
+    },
+    {
+      icon: Shield,
+      title: "Seguro e Privado",
+      description: "Seus dados ficam protegidos e apenas você tem acesso",
+    },
+    {
+      icon: Bell,
+      title: "Insights Inteligentes",
+      description: "Receba dicas personalizadas para economizar mais",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
-      <Header onLoginClick={() => setShowAuth(true)} />
-
-      <main className="px-4 pb-24 pt-4">
-        <WeeklySummary purchases={purchases} />
-        <StatsOverview
-          purchases={purchases}
-          onViewStats={() => setShowStats(true)}
-        />
-        <PurchaseList purchases={purchases} loading={loading} error={error} />
-      </main>
-
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4">
+      {/* Hero Section */}
+      <div className="px-4 pt-12 pb-16 text-center">
+        <div className="bg-primary/10 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
+          <span className="text-5xl">🍔</span>
+        </div>
+        <h1 className="text-4xl font-bold text-foreground mb-4">
+          iFood Tracker
+        </h1>
+        <p className="text-muted-foreground text-lg max-w-md mx-auto mb-8">
+          Controle seus gastos com delivery de forma simples, organizada e
+          inteligente
+        </p>
         <button
-          onClick={() => setShowAddPurchase(true)}
-          className="w-full bg-primary text-primary-foreground font-semibold py-4 rounded-xl text-base active:scale-[0.98] transition-transform"
+          onClick={() => setShowAuth(true)}
+          className="bg-primary text-primary-foreground font-bold py-4 px-8 rounded-xl text-base active:scale-[0.98] transition-transform"
         >
-          Cadastrar Compra
+          Começar Gratuitamente
         </button>
       </div>
 
-      <StatsModal
-        open={showStats}
-        onClose={() => setShowStats(false)}
-        purchases={purchases}
-      />
-      <AddPurchaseModal
-        open={showAddPurchase}
-        onClose={() => setShowAddPurchase(false)}
-        onAdd={addPurchase}
-      />
+      {/* Features Section */}
+      <div className="px-4 pb-16">
+        <h2 className="text-2xl font-bold text-foreground text-center mb-8">
+          Por que usar o iFood Tracker?
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {features.map((feature) => (
+            <div
+              key={feature.title}
+              className="bg-card rounded-2xl p-6 flex flex-col items-center text-center"
+            >
+              <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                <feature.icon className="w-7 h-7 text-primary" />
+              </div>
+              <h3 className="font-bold text-foreground text-lg mb-2">
+                {feature.title}
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                {feature.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="px-4 pb-16">
+        <div className="bg-primary/5 rounded-3xl p-8 text-center max-w-2xl mx-auto border border-primary/20">
+          <h2 className="text-2xl font-bold text-foreground mb-4">
+            Pronto para começar?
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            Crie sua conta gratuita e tenha controle total dos seus gastos com
+            delivery
+          </p>
+          <button
+            onClick={() => setShowAuth(true)}
+            className="bg-primary text-primary-foreground font-bold py-4 px-8 rounded-xl text-base active:scale-[0.98] transition-transform"
+          >
+            Criar Conta Grátis
+          </button>
+        </div>
+      </div>
+
       <AuthModal open={showAuth} onClose={() => setShowAuth(false)} />
     </div>
   );
