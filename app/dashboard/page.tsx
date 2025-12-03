@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/header";
 import { WeeklySummary } from "@/components/weekly-summary";
+import { SmartInsights } from "@/components/smart-insights";
 import { StatsOverview } from "@/components/stats-overview";
 import { PurchaseList } from "@/components/purchase-list";
 import { StatsModal } from "@/components/stats-modal";
@@ -88,6 +89,7 @@ export default function DashboardPage() {
 
       <main className="px-4 pb-24 pt-4">
         <WeeklySummary purchases={purchases} />
+        <SmartInsights purchases={purchases} />
         <StatsOverview
           purchases={purchases}
           onViewStats={() => setShowStats(true)}

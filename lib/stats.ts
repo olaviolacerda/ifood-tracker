@@ -13,8 +13,42 @@ import {
   startOfMonth,
   endOfMonth,
   subWeeks,
+  subMonths,
+  startOfQuarter,
+  endOfQuarter,
+  startOfYear,
+  endOfYear,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
+
+export type TimePeriod = "weekly" | "monthly" | "quarterly" | "yearly";
+
+function getPeriodRange(period: TimePeriod) {
+  const now = new Date();
+  let start: Date;
+  let end: Date;
+
+  switch (period) {
+    case "weekly":
+      start = startOfWeek(now, { locale: ptBR });
+      end = endOfWeek(now, { locale: ptBR });
+      break;
+    case "monthly":
+      start = startOfMonth(now);
+      end = endOfMonth(now);
+      break;
+    case "quarterly":
+      start = startOfQuarter(now);
+      end = endOfQuarter(now);
+      break;
+    case "yearly":
+      start = startOfYear(now);
+      end = endOfYear(now);
+      break;
+  }
+
+  return { start, end };
+}
 
 export function calculateWeeklyStats(purchases: Purchase[]): WeeklyStats {
   const now = new Date();
@@ -218,4 +252,168 @@ export function getMonthlyEvolutionData(purchases: Purchase[]) {
   }
 
   return months;
+}
+
+export function getYearlyPurchasesByPeriod(purchases: Purchase[]) {
+  const now = new Date();
+  const yearStart = new Date(now.getFullYear(), 0, 1);
+  const yearEnd = new Date(now.getFullYear(), 11, 31);
+
+  const yearlyPurchases = purchases.filter((p) => {
+    const purchaseDate = new Date(p.date);
+    return isWithinInterval(purchaseDate, { start: yearStart, end: yearEnd });
+  });
+
+  const periods = {
+    morning: 0, // 5h-12h
+    afternoon: 0, // 12h-18h
+    night: 0, // 18h-5h
+  };
+
+  yearlyPurchases.forEach((p) => {
+    const hour = parseInt(p.time.split(":")[0]);
+
+    if (hour >= 5 && hour < 12) {
+      periods.morning++;
+    } else if (hour >= 12 && hour < 18) {
+      periods.afternoon++;
+    } else {
+      periods.night++;
+    }
+  });
+
+  return [
+    { name: "Manhã", value: periods.morning, emoji: "☀️", color: "#f59e0b" },
+    { name: "Tarde", value: periods.afternoon, emoji: "🌤️", color: "#f97316" },
+    { name: "Noite", value: periods.night, emoji: "🌙", color: "#6366f1" },
+  ].filter((period) => period.value > 0);
+}
+
+export function getYearlyPurchasesByWeekday(purchases: Purchase[]) {
+  const now = new Date();
+  const yearStart = new Date(now.getFullYear(), 0, 1);
+  const yearEnd = new Date(now.getFullYear(), 11, 31);
+
+  const yearlyPurchases = purchases.filter((p) => {
+    const purchaseDate = new Date(p.date);
+    return isWithinInterval(purchaseDate, { start: yearStart, end: yearEnd });
+  });
+
+  const weekdays = {
+    0: { name: "Dom", value: 0, fullName: "Domingo" },
+    1: { name: "Seg", value: 0, fullName: "Segunda" },
+    2: { name: "Ter", value: 0, fullName: "Terça" },
+    3: { name: "Qua", value: 0, fullName: "Quarta" },
+    4: { name: "Qui", value: 0, fullName: "Quinta" },
+    5: { name: "Sex", value: 0, fullName: "Sexta" },
+    6: { name: "Sáb", value: 0, fullName: "Sábado" },
+  };
+
+  yearlyPurchases.forEach((p) => {
+    const purchaseDate = new Date(p.date);
+    const dayOfWeek = purchaseDate.getDay();
+    weekdays[dayOfWeek as keyof typeof weekdays].value++;
+  });
+
+  return Object.values(weekdays);
+}
+
+export function getPurchasesByPeriod(
+  purchases: Purchase[],
+  period: TimePeriod
+) {
+  const { start, end } = getPeriodRange(period);
+
+  const filteredPurchases = purchases.filter((p) => {
+    const purchaseDate = new Date(p.date);
+    return isWithinInterval(purchaseDate, { start, end });
+  });
+
+  const periods = {
+    morning: 0,
+    afternoon: 0,
+    night: 0,
+  };
+
+  filteredPurchases.forEach((p) => {
+    const hour = parseInt(p.time.split(":")[0]);
+
+    if (hour >= 5 && hour < 12) {
+      periods.morning++;
+    } else if (hour >= 12 && hour < 18) {
+      periods.afternoon++;
+    } else {
+      periods.night++;
+    }
+  });
+
+  return [
+    { name: "Manhã", value: periods.morning, emoji: "☀️", color: "#f59e0b" },
+    { name: "Tarde", value: periods.afternoon, emoji: "🌤️", color: "#f97316" },
+    { name: "Noite", value: periods.night, emoji: "🌙", color: "#6366f1" },
+  ].filter((period) => period.value > 0);
+}
+
+export function getPurchasesByWeekday(
+  purchases: Purchase[],
+  period: TimePeriod
+) {
+  const { start, end } = getPeriodRange(period);
+
+  const filteredPurchases = purchases.filter((p) => {
+    const purchaseDate = new Date(p.date);
+    return isWithinInterval(purchaseDate, { start, end });
+  });
+
+  const weekdays = {
+    0: { name: "Dom", value: 0, fullName: "Domingo" },
+    1: { name: "Seg", value: 0, fullName: "Segunda" },
+    2: { name: "Ter", value: 0, fullName: "Terça" },
+    3: { name: "Qua", value: 0, fullName: "Quarta" },
+    4: { name: "Qui", value: 0, fullName: "Quinta" },
+    5: { name: "Sex", value: 0, fullName: "Sexta" },
+    6: { name: "Sáb", value: 0, fullName: "Sábado" },
+  };
+
+  filteredPurchases.forEach((p) => {
+    const purchaseDate = new Date(p.date);
+    const dayOfWeek = purchaseDate.getDay();
+    weekdays[dayOfWeek as keyof typeof weekdays].value++;
+  });
+
+  return Object.values(weekdays);
+}
+
+export function getFilteredPurchases(
+  purchases: Purchase[],
+  period: TimePeriod
+): Purchase[] {
+  const { start, end } = getPeriodRange(period);
+
+  return purchases.filter((p) => {
+    const purchaseDate = new Date(p.date);
+    return isWithinInterval(purchaseDate, { start, end });
+  });
+}
+
+export function getPeriodLabel(period: TimePeriod): string {
+  const now = new Date();
+
+  switch (period) {
+    case "weekly":
+      const weekStart = startOfWeek(now, { locale: ptBR });
+      const weekEnd = endOfWeek(now, { locale: ptBR });
+      return `${format(weekStart, "dd/MM", { locale: ptBR })} - ${format(
+        weekEnd,
+        "dd/MM",
+        { locale: ptBR }
+      )}`;
+    case "monthly":
+      return format(now, "MMMM 'de' yyyy", { locale: ptBR });
+    case "quarterly":
+      const quarter = Math.floor(now.getMonth() / 3) + 1;
+      return `${quarter}º Trimestre de ${now.getFullYear()}`;
+    case "yearly":
+      return `${now.getFullYear()}`;
+  }
 }
