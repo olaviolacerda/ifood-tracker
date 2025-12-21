@@ -44,8 +44,11 @@ export function AddPurchaseModal({
       const now = new Date();
       const dateStr = now.toISOString().split("T")[0];
       const timeStr = now.toTimeString().slice(0, 5);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDate(dateStr);
+
       setTime(timeStr);
+
       setErrors({});
     }
   }, [open]);

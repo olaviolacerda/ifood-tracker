@@ -229,8 +229,8 @@ export function PurchaseCard({
           <div className="bg-card border border-border rounded-2xl p-6 max-w-sm w-full shadow-xl">
             <h3 className="text-lg font-semibold mb-2">Confirmar exclusão</h3>
             <p className="text-muted-foreground text-sm mb-6">
-              Tem certeza que deseja deletar o pedido de "{purchase.dish}"? Esta
-              ação não pode ser desfeita.
+              Tem certeza que deseja deletar o pedido de &quot;{purchase.dish}
+              &quot;? Esta ação não pode ser desfeita.
             </p>
             <div className="flex gap-3">
               <button

@@ -56,7 +56,8 @@ export function PurchaseList({
             Nenhum pedido cadastrado ainda.
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            Clique em "Cadastrar Pedido" para adicionar seu primeiro pedido.
+            Clique em &quot;Cadastrar Pedido&quot; para adicionar seu primeiro
+            pedido.
           </p>
         </div>
       </section>

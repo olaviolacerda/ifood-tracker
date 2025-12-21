@@ -46,19 +46,29 @@ export function EditPurchaseModal({
   // Load purchase data when modal opens
   useEffect(() => {
     if (open && purchase) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDish(purchase.dish);
+
       setRestaurant(purchase.restaurant);
+
       setValuePaid(purchase.valuePaid.toString().replace(".", ","));
+
       setValueTotal(
         purchase.valueTotal
           ? purchase.valueTotal.toString().replace(".", ",")
           : ""
       );
+
       setDate(purchase.date);
+
       setTime(purchase.time);
+
       setCategory(purchase.category);
+
       setIsEvent(purchase.isEvent);
+
       setIsAlone(purchase.isAlone);
+
       setErrors({});
     }
   }, [open, purchase]);
