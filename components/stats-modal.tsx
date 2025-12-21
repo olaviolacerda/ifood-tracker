@@ -35,6 +35,8 @@ import {
   type TimePeriod,
 } from "@/lib/stats";
 import { useCategories } from "@/hooks/useCategories";
+import { User } from "lucide-react";
+import { countAloneOrders } from "@/lib/stats";
 
 interface StatsModalProps {
   open: boolean;
@@ -117,15 +119,31 @@ export function StatsModal({ open, onClose, purchases }: StatsModalProps) {
               </div>
             </div>
 
-            <div className="bg-card rounded-2xl p-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Utensils className="w-4 h-4 text-primary" />
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="bg-card rounded-2xl p-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                    <Utensils className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground text-xs">Pedidos</p>
+                    <p className="text-foreground font-bold text-lg">
+                      {monthlyStats.totalOrders}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-card rounded-2xl p-3 flex items-center gap-3">
+                <div className="w-10 h-10 bg-rose-600/10 rounded-full flex items-center justify-center">
+                  <User className="w-5 h-5 text-rose-600" />
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-xs">Pedidos</p>
+                  <p className="text-muted-foreground text-xs">
+                    Pedidos sozinho
+                  </p>
                   <p className="text-foreground font-bold text-lg">
-                    {monthlyStats.totalOrders}
+                    {countAloneOrders(purchases, "monthly")}
                   </p>
                 </div>
               </div>

@@ -396,6 +396,14 @@ export function getFilteredPurchases(
   });
 }
 
+export function countAloneOrders(
+  purchases: Purchase[],
+  period?: TimePeriod
+): number {
+  const filtered = period ? getFilteredPurchases(purchases, period) : purchases;
+  return filtered.filter((p) => !!p.isAlone).length;
+}
+
 export function getPeriodLabel(period: TimePeriod): string {
   const now = new Date();
 
