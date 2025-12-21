@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   collection,
   getDocs,
@@ -21,7 +21,7 @@ export function useCategories() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       setLoading(true);
       const q = query(collection(db, "categories"), orderBy("order", "asc"));
@@ -52,7 +52,7 @@ export function useCategories() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const seedDefaultCategories = async () => {
     const defaultCategories = [
@@ -203,7 +203,7 @@ export function useCategories() {
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   return {
     categories,

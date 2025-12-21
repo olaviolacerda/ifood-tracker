@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   collection,
   addDoc,
@@ -22,7 +22,7 @@ export function usePurchases() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPurchases = async () => {
+  const fetchPurchases = useCallback(async () => {
     if (!user) {
       setPurchases([]);
       setLoading(false);
@@ -54,7 +54,7 @@ export function usePurchases() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const addPurchase = async (purchaseData: PurchaseInput) => {
     if (!user) {
@@ -165,7 +165,7 @@ export function usePurchases() {
 
   useEffect(() => {
     fetchPurchases();
-  }, [user]);
+  }, [user, fetchPurchases]);
 
   return {
     purchases,
