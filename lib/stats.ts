@@ -23,6 +23,15 @@ import { ptBR } from "date-fns/locale";
 
 export type TimePeriod = "weekly" | "monthly" | "quarterly" | "yearly";
 
+/**
+ * Parse uma data no formato YYYY-MM-DD como data local, sem conversão de fuso horário
+ * Evita o problema onde new Date("2025-02-14") é interpretado como UTC e depois convertido
+ */
+function parseLocalDate(dateString: string): Date {
+  const [year, month, day] = dateString.split("-").map(Number);
+  return new Date(year, month - 1, day, 0, 0, 0, 0);
+}
+
 function getPeriodRange(period: TimePeriod) {
   const now = new Date();
   let start: Date;
@@ -60,13 +69,13 @@ export function calculateWeeklyStats(purchases: Purchase[]): WeeklyStats {
 
   // Filter purchases for current week
   const currentWeekPurchases = purchases.filter((p) => {
-    const purchaseDate = new Date(p.date);
+    const purchaseDate = parseLocalDate(p.date);
     return isWithinInterval(purchaseDate, { start: weekStart, end: weekEnd });
   });
 
   // Filter purchases for last week
   const lastWeekPurchases = purchases.filter((p) => {
-    const purchaseDate = new Date(p.date);
+    const purchaseDate = parseLocalDate(p.date);
     return isWithinInterval(purchaseDate, {
       start: lastWeekStart,
       end: lastWeekEnd,
@@ -75,14 +84,14 @@ export function calculateWeeklyStats(purchases: Purchase[]): WeeklyStats {
 
   const totalSpent = currentWeekPurchases.reduce(
     (sum, p) => sum + p.valuePaid,
-    0
+    0,
   );
   const orders = currentWeekPurchases.length;
   const avgPerOrder = orders > 0 ? totalSpent / orders : 0;
 
   const lastWeekSpent = lastWeekPurchases.reduce(
     (sum, p) => sum + p.valuePaid,
-    0
+    0,
   );
   const lastWeekOrders = lastWeekPurchases.length;
 
@@ -104,7 +113,7 @@ export function calculateWeeklyStats(purchases: Purchase[]): WeeklyStats {
     weekRange: `${format(weekStart, "dd MMM", { locale: ptBR })} - ${format(
       weekEnd,
       "dd MMM",
-      { locale: ptBR }
+      { locale: ptBR },
     )}`,
   };
 }
@@ -115,7 +124,7 @@ export function calculateMonthlyStats(purchases: Purchase[]): MonthlyStats {
   const monthEnd = endOfMonth(now);
 
   const monthlyPurchases = purchases.filter((p) => {
-    const purchaseDate = new Date(p.date);
+    const purchaseDate = parseLocalDate(p.date);
     return isWithinInterval(purchaseDate, { start: monthStart, end: monthEnd });
   });
 
@@ -132,14 +141,14 @@ export function calculateMonthlyStats(purchases: Purchase[]): MonthlyStats {
 
 export function calculateCategoryStats(
   purchases: Purchase[],
-  categories: Category[]
+  categories: Category[],
 ): CategoryStats[] {
   const now = new Date();
   const monthStart = startOfMonth(now);
   const monthEnd = endOfMonth(now);
 
   const monthlyPurchases = purchases.filter((p) => {
-    const purchaseDate = new Date(p.date);
+    const purchaseDate = parseLocalDate(p.date);
     return isWithinInterval(purchaseDate, { start: monthStart, end: monthEnd });
   });
 
@@ -163,21 +172,15 @@ export function calculateCategoryStats(
 
 export function formatPurchaseDate(date: string, time: string): string {
   const now = new Date();
-  const purchaseDate = new Date(date);
+  const purchaseDate = parseLocalDate(date);
 
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
 
-  const purchaseDateOnly = new Date(
-    purchaseDate.getFullYear(),
-    purchaseDate.getMonth(),
-    purchaseDate.getDate()
-  );
-
-  if (purchaseDateOnly.getTime() === today.getTime()) {
+  if (purchaseDate.getTime() === today.getTime()) {
     return `Hoje, ${time}`;
-  } else if (purchaseDateOnly.getTime() === yesterday.getTime()) {
+  } else if (purchaseDate.getTime() === yesterday.getTime()) {
     return `Ontem, ${time}`;
   } else {
     return `${format(purchaseDate, "dd MMM", { locale: ptBR })}, ${time}`;
@@ -198,7 +201,7 @@ export function getWeeklySpendingData(purchases: Purchase[]) {
     const currentWeekEnd = endOfWeek(currentWeekStart, { locale: ptBR });
 
     const weekPurchases = purchases.filter((p) => {
-      const purchaseDate = new Date(p.date);
+      const purchaseDate = parseLocalDate(p.date);
       return isWithinInterval(purchaseDate, {
         start: currentWeekStart,
         end: currentWeekEnd,
@@ -236,7 +239,7 @@ export function getMonthlyEvolutionData(purchases: Purchase[]) {
     const monthEnd = endOfMonth(monthDate);
 
     const monthPurchases = purchases.filter((p) => {
-      const purchaseDate = new Date(p.date);
+      const purchaseDate = parseLocalDate(p.date);
       return isWithinInterval(purchaseDate, {
         start: monthStart,
         end: monthEnd,
@@ -260,7 +263,7 @@ export function getYearlyPurchasesByPeriod(purchases: Purchase[]) {
   const yearEnd = new Date(now.getFullYear(), 11, 31);
 
   const yearlyPurchases = purchases.filter((p) => {
-    const purchaseDate = new Date(p.date);
+    const purchaseDate = parseLocalDate(p.date);
     return isWithinInterval(purchaseDate, { start: yearStart, end: yearEnd });
   });
 
@@ -295,7 +298,7 @@ export function getYearlyPurchasesByWeekday(purchases: Purchase[]) {
   const yearEnd = new Date(now.getFullYear(), 11, 31);
 
   const yearlyPurchases = purchases.filter((p) => {
-    const purchaseDate = new Date(p.date);
+    const purchaseDate = parseLocalDate(p.date);
     return isWithinInterval(purchaseDate, { start: yearStart, end: yearEnd });
   });
 
@@ -310,7 +313,7 @@ export function getYearlyPurchasesByWeekday(purchases: Purchase[]) {
   };
 
   yearlyPurchases.forEach((p) => {
-    const purchaseDate = new Date(p.date);
+    const purchaseDate = parseLocalDate(p.date);
     const dayOfWeek = purchaseDate.getDay();
     weekdays[dayOfWeek as keyof typeof weekdays].value++;
   });
@@ -320,12 +323,12 @@ export function getYearlyPurchasesByWeekday(purchases: Purchase[]) {
 
 export function getPurchasesByPeriod(
   purchases: Purchase[],
-  period: TimePeriod
+  period: TimePeriod,
 ) {
   const { start, end } = getPeriodRange(period);
 
   const filteredPurchases = purchases.filter((p) => {
-    const purchaseDate = new Date(p.date);
+    const purchaseDate = parseLocalDate(p.date);
     return isWithinInterval(purchaseDate, { start, end });
   });
 
@@ -356,12 +359,12 @@ export function getPurchasesByPeriod(
 
 export function getPurchasesByWeekday(
   purchases: Purchase[],
-  period: TimePeriod
+  period: TimePeriod,
 ) {
   const { start, end } = getPeriodRange(period);
 
   const filteredPurchases = purchases.filter((p) => {
-    const purchaseDate = new Date(p.date);
+    const purchaseDate = parseLocalDate(p.date);
     return isWithinInterval(purchaseDate, { start, end });
   });
 
@@ -376,7 +379,7 @@ export function getPurchasesByWeekday(
   };
 
   filteredPurchases.forEach((p) => {
-    const purchaseDate = new Date(p.date);
+    const purchaseDate = parseLocalDate(p.date);
     const dayOfWeek = purchaseDate.getDay();
     weekdays[dayOfWeek as keyof typeof weekdays].value++;
   });
@@ -386,19 +389,19 @@ export function getPurchasesByWeekday(
 
 export function getFilteredPurchases(
   purchases: Purchase[],
-  period: TimePeriod
+  period: TimePeriod,
 ): Purchase[] {
   const { start, end } = getPeriodRange(period);
 
   return purchases.filter((p) => {
-    const purchaseDate = new Date(p.date);
+    const purchaseDate = parseLocalDate(p.date);
     return isWithinInterval(purchaseDate, { start, end });
   });
 }
 
 export function countAloneOrders(
   purchases: Purchase[],
-  period?: TimePeriod
+  period?: TimePeriod,
 ): number {
   const filtered = period ? getFilteredPurchases(purchases, period) : purchases;
   return filtered.filter((p) => !!p.isAlone).length;
@@ -414,7 +417,7 @@ export function getPeriodLabel(period: TimePeriod): string {
       return `${format(weekStart, "dd/MM", { locale: ptBR })} - ${format(
         weekEnd,
         "dd/MM",
-        { locale: ptBR }
+        { locale: ptBR },
       )}`;
     case "monthly":
       return format(now, "MMMM 'de' yyyy", { locale: ptBR });
