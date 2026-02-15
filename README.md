@@ -246,7 +246,7 @@ Este projeto é de código aberto para fins educacionais.
 
 ## 👤 Autor
 
-Desenvolvido com ❤️ por [Seu Nome]
+Desenvolvido com ❤️ por Olavio Lacerda + Copilot.
 
 ---
 
